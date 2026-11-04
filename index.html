@@ -81,11 +81,15 @@
   .lenchk .ok{color:#155c50} .lenchk .bad{color:var(--warn);font-weight:bold}
   .cand .no{display:none;font-size:11px;color:#fff;background:var(--accent);border-radius:4px;padding:0 6px;margin-right:6px}
   .cand.on .no{display:inline-block}
+  .nav{display:flex;gap:6px;margin:0 0 8px}
+  .nav a{font-size:13px;text-decoration:none;color:var(--accent);border:1px solid var(--accent);border-radius:999px;padding:2px 12px}
+  .nav a.on{background:var(--accent);color:#fff}
   @media (min-width:901px){main>.card{position:sticky;top:12px;align-self:start;max-height:calc(100vh - 24px);overflow:auto}}
 </style>
 </head>
 <body>
 <header>
+  <nav class="nav"><a href="index.html" class="on">보도자료</a><a href="report.html">보고서</a></nav>
   <h1>제주도 보도자료 HWPX 만들기 + AI 추천</h1>
   <div class="sub">보도자료 내용을 넣으면 한글 문서(HWPX)로 내려받습니다. 자료를 올리면 Claude가 제목·부제·초안을 추천합니다. AI 기능을 쓸 때만 자료가 Anthropic으로 전송되고, 그 밖의 내용은 이 PC 안에서만 다룹니다.</div>
 </header>

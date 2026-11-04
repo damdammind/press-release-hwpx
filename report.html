@@ -1,0 +1,604 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>제주도 보고서 도우미</title>
+<style>
+  :root{--bg:#f6f4ef;--card:#fff;--ink:#222;--muted:#666;--line:#ddd6c8;--accent:#1f7a6b;--warn:#a8481c}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Malgun Gothic","Apple SD Gothic Neo",sans-serif;line-height:1.6}
+  header{padding:20px 24px 8px;max-width:1300px;margin:0 auto;box-sizing:border-box} h1{margin:0;font-size:24px} .sub{color:var(--muted);font-size:14px}
+  main{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:8px 24px 40px;max-width:1300px;margin:0 auto;box-sizing:border-box}
+  @media (max-width:900px){main{grid-template-columns:1fr}}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px}
+  label{display:block;font-size:13px;color:var(--muted);margin-top:10px}
+  input,textarea{width:100%;font:inherit;font-size:14px;padding:6px 8px;border:1px solid #ccc;border-radius:6px}
+  textarea{resize:vertical}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .three{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+  button{background:var(--accent);color:#fff;border:0;border-radius:6px;padding:10px 16px;font-size:15px;cursor:pointer;margin-top:14px}
+  button.light{background:#fff;color:var(--accent);border:1px solid var(--accent)}
+  .msg{padding:10px 12px;border-radius:6px;margin-top:10px;font-size:14px}
+  .msg.err{background:#fbe9e2;color:var(--warn)} .msg.ok{background:#e4f2ee;color:#155c50}
+  .paper{background:#fff;border:1px solid #bbb;padding:28px 30px 16px;min-height:600px;font-family:"휴먼명조","HCR Batang","Batang","바탕","Noto Serif KR",serif;font-size:14px;color:#000}
+  table.jh{border-collapse:collapse;width:100%;table-layout:fixed;font-family:"맑은 고딕","Malgun Gothic",sans-serif;font-size:12px}
+  table.jh td{border:1px solid #000;padding:3px 4px;text-align:center;word-break:keep-all}
+  table.jh tr.r0 td{height:38px} table.jh img{width:90%;max-width:150px;display:block;margin:auto}
+  table.jh .bd{font-family:"HY견고딕","맑은 고딕",sans-serif;font-weight:900;font-size:15px}
+  table.jh .dt{font-size:14px;letter-spacing:-.5px} table.jh .blue{color:#00f}
+  .jt{margin:8px 0 14px;padding:10px 14px 14px;background-size:100% 100%;text-align:center}
+  .jt .tt{font-family:"HY헤드라인M","HYHeadLine M","맑은 고딕",sans-serif;font-weight:900;font-size:22px;letter-spacing:-.5px;line-height:1.35;word-break:keep-all}
+  .jt .st{font-size:14px;letter-spacing:-.6px;line-height:1.6;word-break:keep-all}
+  .jb p{margin:0;font-size:15px;line-height:1.6;text-align:justify;padding-left:1.3em;text-indent:-1.3em;word-break:keep-all}
+  .jb p.l1{font-weight:bold} .jb p.l2{padding-left:2em;text-indent:-1.3em} .jb p.gap{margin-top:1.1em}
+  .jb .mk{display:inline-block;width:1.3em;text-indent:0} .jb p.l1 .mk{font-weight:normal}
+  .pn{text-align:center;font-size:12px;margin-top:24px;color:#333}
+  .dept{border:1px solid var(--line);border-radius:8px;padding:4px 10px 10px;margin-top:8px;background:#fbfaf7}
+  .dhead{display:flex;justify-content:space-between;align-items:center;font-size:13px;padding-top:4px}
+  .dhead button{margin:0}
+  .note{font-size:13px;color:var(--muted)}
+  /* ===== 자료 업로드 + AI 추천 ===== */
+  .col{display:flex;flex-direction:column;gap:16px;min-width:0}
+  h2{font-size:16px;margin:0 0 4px} h3{font-size:14px;margin:14px 0 2px}
+  select{width:100%;font:inherit;font-size:14px;padding:6px 8px;border:1px solid #ccc;border-radius:6px;background:#fff}
+  details.api{border:1px solid var(--line);border-radius:8px;padding:8px 12px;margin-top:8px;background:#fbfaf7}
+  details.api summary{cursor:pointer;font-size:14px;font-weight:bold}
+  .chk{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ink);margin-top:8px}
+  .chk input{width:auto}
+  .drop{border:2px dashed var(--line);border-radius:8px;padding:18px;text-align:center;color:var(--muted);cursor:pointer;background:#fbfaf7;margin-top:10px;font-size:14px}
+  .drop.over{border-color:var(--accent);background:#eef6f4}
+  .files{list-style:none;padding:0;margin:8px 0 0}
+  .files li{display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid #eee;font-size:13px}
+  .files img,.files .ico{width:40px;height:40px;object-fit:cover;border-radius:4px;flex:none}
+  .files .ico{display:flex;align-items:center;justify-content:center;background:#eee;font-size:11px;font-weight:bold;color:#555}
+  .files .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .files .sz{color:var(--muted);font-size:12px;flex:none}
+  .files button{margin:0;padding:2px 8px;font-size:12px;flex:none}
+  .cand{border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin-top:6px;cursor:pointer}
+  .cand:hover{border-color:var(--accent)} .cand.on{border-color:var(--accent);background:#eef6f4;box-shadow:inset 3px 0 0 var(--accent)}
+  .cand .tx{font-weight:bold}
+  .cand .why{font-size:12px;color:var(--muted)}
+  .tag{display:inline-block;font-size:11px;color:#fff;border-radius:4px;padding:0 6px;margin-right:6px;background:#1f3f7a;vertical-align:1px}
+  .tag.hot{background:#c0392b} .tag.mid{background:#c77800}
+  .draft{background:#f7f7f4;border:1px solid #e6e2d8;border-radius:6px;padding:8px 10px;font-size:13px;white-space:pre-wrap;max-height:260px;overflow:auto}
+  .checks{background:#fff7e6;border:1px solid #f0d9a8;border-radius:6px;padding:6px 10px 6px 28px;font-size:13px;margin:4px 0}
+  .usage{font-size:12px;color:var(--muted);margin-top:8px}
+  button:disabled{opacity:.55;cursor:wait}
+  .small{padding:6px 10px;font-size:13px;margin-top:8px}
+  .orow{display:grid;grid-template-columns:150px 1fr;gap:4px 10px;align-items:center;padding:7px 0;border-bottom:1px dashed #e4dfd3}
+  .orow:last-of-type{border-bottom:0}
+  .orow>label.chk{margin:0;font-weight:bold}
+  .orow .ctl{display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:13px;min-width:0}
+  .orow .ctl input[type=number]{width:84px}
+  .orow .ctl input:not([type]),.orow .ctl select{flex:1;min-width:140px}
+  .orow .gen{grid-column:2;font-size:12px;color:var(--muted)}
+  .orow.off .ctl{opacity:.45}
+  @media (max-width:520px){.orow{grid-template-columns:1fr}.orow .gen{grid-column:1}}
+  .cnt{font-size:12px;color:var(--accent);font-weight:bold}
+  .cnt.bad{color:var(--warn)}
+  .lenchk{font-size:13px;margin:4px 0}
+  .lenchk .ok{color:#155c50} .lenchk .bad{color:var(--warn);font-weight:bold}
+  .cand .no{display:none;font-size:11px;color:#fff;background:var(--accent);border-radius:4px;padding:0 6px;margin-right:6px}
+  .cand.on .no{display:inline-block}
+  @media (min-width:901px){main>.card{position:sticky;top:12px;align-self:start;max-height:calc(100vh - 24px);overflow:auto}}
+  /* ===== 보고서 미리보기 ===== */
+  .rmeta{text-align:right;font-size:14px;margin:4px 0 0;line-height:1.5}
+  .rb p{margin:0;font-size:15px;line-height:1.6;text-align:justify;word-break:keep-all}
+  .rb p.h{font-family:"HY헤드라인M","HYHeadLine M","맑은 고딕",sans-serif;font-weight:900;font-size:16px;margin-top:1.1em}
+  .rb p.h:first-child{margin-top:.4em}
+  .rb p.l1{padding-left:1.5em;text-indent:-1.5em;margin-top:.45em}
+  .rb p.l2{font-size:14.2px;padding-left:2.5em;text-indent:-1.5em}
+  .rb p.l3{font-size:14.2px;padding-left:4.2em;text-indent:-1em}
+  .rb p.nt{font-size:12.5px;padding-left:4.6em;text-indent:-1.5em}
+  .nav{display:flex;gap:6px;margin:0 0 8px}
+  .nav a{font-size:13px;text-decoration:none;color:var(--accent);border:1px solid var(--accent);border-radius:999px;padding:2px 12px}
+  .nav a.on{background:var(--accent);color:#fff}
+  .keys{font-size:12px;color:var(--muted);background:#fbfaf7;border:1px solid var(--line);border-radius:6px;padding:6px 10px;margin-top:4px}
+  .keys b{color:var(--ink)}
+</style>
+</head>
+<body>
+<header>
+  <nav class="nav"><a href="index.html">보도자료</a><a href="report.html" class="on">보고서</a></nav>
+  <h1>제주도 보고서 HWPX 만들기 + AI 초안</h1>
+  <div class="sub">개조식(□·○·-·※) 보고서를 한글 문서(HWPX)로 내려받습니다. 자료를 올리면 Claude가 제목과 본문 초안을 만들어 줍니다. AI 기능을 쓸 때만 자료가 Anthropic으로 전송되고, 그 밖의 내용은 이 PC 안에서만 다룹니다.</div>
+</header>
+<main>
+  <div class="col">
+  <section class="card" id="aiCard">
+    <h2>① 자료 올리고 AI 초안 받기</h2>
+    <div class="note" style="margin:0">회의 자료, 결과 자료, 사진, 메모를 올리면 Claude가 보고서 제목 3개와 개조식 본문 초안을 만듭니다.</div>
+
+    <details class="api" id="apiBox">
+      <summary>Claude API 설정 <span class="note" style="font-weight:normal">보도자료 페이지와 같은 키를 씁니다</span></summary>
+      <label>API 키</label><input id="apikey" type="password" autocomplete="off" placeholder="sk-ant-...">
+      <label class="chk"><input type="checkbox" id="remember"> 이 PC 브라우저에 키 기억하기 (공용 PC에서는 끄세요)</label>
+      <label>모델</label>
+      <select id="model">
+        <option value="claude-opus-5-5">Claude Opus 5.5 (품질 우선, 입력 $4 / 출력 $20 · 100만 토큰당)</option>
+        <option value="claude-sonnet-5-5">Claude Sonnet 5.5 (균형, $2 / $10)</option>
+        <option value="claude-haiku-5-5">Claude Haiku 5.5 (빠르고 저렴, $0.1 / $0.5)</option>
+      </select>
+      <p class="note">API 키는 <b>console.anthropic.com</b>에서 발급합니다. 키는 이 화면에서 Anthropic 서버로 바로 보내며 다른 곳으로는 보내지 않습니다. 키가 노출되면 콘솔에서 바로 폐기하세요.</p>
+    </details>
+
+    <div class="drop" id="drop">여기로 파일을 끌어다 놓거나 <b>눌러서 고르세요</b><br>
+      <span style="font-size:12px">사진(JPG·PNG·WEBP·GIF), PDF, 한글(HWPX), 워드(DOCX), 파워포인트(PPTX), 텍스트(TXT·MD·CSV)</span></div>
+    <input type="file" id="fileIn" multiple accept="image/jpeg,image/png,image/webp,image/gif,.pdf,.hwpx,.docx,.pptx,.txt,.md,.csv,.json" hidden>
+    <ul class="files" id="fileList"></ul>
+
+    <label>추가 메모 (보고 목적, 꼭 넣을 숫자, 결정받을 사항 등)</label>
+    <textarea id="memo" rows="4" placeholder="예: 11.3. 감귤 품질 점검 결과를 부지사님께 보고. 위반 12건 조치 결과와 다음 달 계획 중심으로."></textarea>
+
+    <div class="three">
+      <div><label>보고서 종류</label><select id="rkind"></select></div>
+      <div><label>분량</label><select id="rlen"><option>1쪽 이내</option><option>1~2쪽</option><option>2~3쪽</option></select></div>
+      <div><label>보고 대상</label><input id="rreader" list="dlReader" placeholder="예: 도지사"><datalist id="dlReader"><option value="도지사"><option value="행정·경제부지사"><option value="실·국장"><option value="부서 내부 공유"><option value="도의회"></datalist></div>
+    </div>
+    <label>꼭 넣을 표현·강조점 (없으면 비워 두기)</label><input id="rfocus" placeholder="예: 예산 절감 효과, 도민 체감">
+
+    <button id="aiGo">AI로 보고서 초안 받기</button>
+    <div id="aiMsg"></div>
+
+    <div id="aiOut" hidden>
+      <h3>제목 후보 <span class="note">(누르면 제목 칸에 들어갑니다)</span></h3>
+      <div id="titleCands"></div>
+      <div id="draftWrap">
+        <h3>본문 초안</h3>
+        <div class="draft" id="draftView"></div>
+        <button class="small" id="useDraft">본문 칸에 넣기</button>
+      </div>
+      <div id="chkWrap">
+        <h3>꼭 확인할 것</h3>
+        <ul class="checks" id="chkList"></ul>
+      </div>
+      <div class="usage" id="usage"></div>
+    </div>
+    <p class="note">AI 기능을 쓸 때만 올린 자료와 메모가 Anthropic(Claude) 서버로 전송됩니다. 비공개 자료, 개인정보가 담긴 자료는 기관 보안 지침을 먼저 확인하세요. AI 초안은 사실과 다를 수 있으니 반드시 원자료와 대조합니다.</p>
+  </section>
+  <section class="card">
+    <h2>② 내용 다듬기</h2>
+    <label>제목</label><input id="title" placeholder="예: 감귤 출하기 품질 점검 결과 보고">
+    <label>부제 (없으면 비워 두기)</label><input id="subtitle" placeholder="예: 11월 선과장 점검반 운영 결과">
+    <div class="three">
+      <div><label>보고 날짜</label><input id="date" placeholder="2026. 11. 4.(수)"></div>
+      <div><label>부서</label><input id="dept" placeholder="예: 감귤진흥과"></div>
+      <div><label>작성자·연락처 (선택)</label><input id="writer" placeholder="예: 유통팀장 김제주 ☎710-0001"></div>
+    </div>
+    <label>본문 <span class="cnt" id="cntBody"></span></label>
+    <textarea id="body" rows="16" placeholder="1. 추진 배경&#10;□ ……을 위해 ……을 추진함&#10;○ 기간: ……&#10;- ……&#10;※ ……&#10;2. 주요 내용&#10;□ ……"></textarea>
+    <div class="keys">한 줄이 한 문단입니다. 줄 앞 기호로 단계를 정합니다.
+      <b>1.</b>·<b>Ⅰ.</b> 큰 제목 · <b>□</b>(또는 기호 없음) 1단계 · <b>○</b>(또는 ㅇ, o) 2단계 · <b>-</b> 3단계 · <b>※</b>(또는 *) 참고</div>
+    <div>
+      <button type="button" class="small light" id="skel">목차 틀 넣기</button>
+      <span class="note">위에서 고른 보고서 종류의 목차를 본문에 넣습니다.</span>
+    </div>
+    <div>
+    <button id="dl">HWPX 내려받기</button>
+    <button id="sample" class="light">예시 채우기 (가상)</button>
+    </div>
+    <div id="msg"></div>
+    <p class="note">보도자료와 같은 제주특별자치도 문서 틀(그림자 제목 상자, 휴먼명조, 쪽 번호)에 개조식 문단으로 만듭니다. 입력한 내용은 이 PC 브라우저에 임시 저장됩니다. 내려받은 파일은 한글에서 열어 확인해 주세요.</p>
+  </section>
+  </div>
+  <section class="card">
+    <div class="paper" id="paper"></div>
+  </section>
+</main>
+<script>
+// TPL: 보도자료 페이지(index.html)와 같은 제주특별자치도 문서 틀 조각. 보고서는 제목 상자·글꼴·쪽 설정만 씁니다.
+const TPL={"HEAD_PRE":"<hp:p id=\"2757524817\" paraPrIDRef=\"29\" styleIDRef=\"0\" pageBreak=\"0\" columnBreak=\"0\" merged=\"0\"><hp:run charPrIDRef=\"3\"><hp:secPr id=\"\" textDirection=\"HORIZONTAL\" spaceColumns=\"1134\" tabStop=\"8000\" tabStopVal=\"4000\" tabStopUnit=\"HWPUNIT\" outlineShapeIDRef=\"1\" memoShapeIDRef=\"0\" textVerticalWidthHead=\"0\" masterPageCnt=\"0\"><hp:grid lineGrid=\"0\" charGrid=\"0\" wonggojiFormat=\"0\"/><hp:startNum pageStartsOn=\"BOTH\" page=\"0\" pic=\"0\" tbl=\"0\" equation=\"0\"/><hp:visibility hideFirstHeader=\"0\" hideFirstFooter=\"0\" hideFirstMasterPage=\"0\" border=\"SHOW_ALL\" fill=\"SHOW_ALL\" hideFirstPageNum=\"0\" hideFirstEmptyLine=\"0\" showLineNumber=\"0\"/><hp:lineNumberShape restartType=\"0\" countBy=\"0\" distance=\"0\" startNumber=\"0\"/><hp:pagePr landscape=\"WIDELY\" width=\"59528\" height=\"84186\" gutterType=\"LEFT_ONLY\"><hp:margin header=\"2834\" footer=\"2834\" gutter=\"0\" left=\"5669\" right=\"5669\" top=\"2834\" bottom=\"2834\"/></hp:pagePr><hp:footNotePr><hp:autoNumFormat type=\"DIGIT\" userChar=\"\" prefixChar=\"\" suffixChar=\")\" supscript=\"0\"/><hp:noteLine length=\"-1\" type=\"SOLID\" width=\"0.12 mm\" color=\"#000000\"/><hp:noteSpacing betweenNotes=\"283\" belowLine=\"567\" aboveLine=\"850\"/><hp:numbering type=\"CONTINUOUS\" newNum=\"1\"/><hp:placement place=\"EACH_COLUMN\" beneathText=\"0\"/></hp:footNotePr><hp:endNotePr><hp:autoNumFormat type=\"DIGIT\" userChar=\"\" prefixChar=\"\" suffixChar=\")\" supscript=\"0\"/><hp:noteLine length=\"14692344\" type=\"SOLID\" width=\"0.12 mm\" color=\"#000000\"/><hp:noteSpacing betweenNotes=\"0\" belowLine=\"567\" aboveLine=\"850\"/><hp:numbering type=\"CONTINUOUS\" newNum=\"1\"/><hp:placement place=\"END_OF_DOCUMENT\" beneathText=\"0\"/></hp:endNotePr><hp:pageBorderFill type=\"BOTH\" borderFillIDRef=\"1\" textBorder=\"PAPER\" headerInside=\"0\" footerInside=\"0\" fillArea=\"PAPER\"><hp:offset left=\"1417\" right=\"1417\" top=\"1417\" bottom=\"1417\"/></hp:pageBorderFill><hp:pageBorderFill type=\"EVEN\" borderFillIDRef=\"1\" textBorder=\"PAPER\" headerInside=\"0\" footerInside=\"0\" fillArea=\"PAPER\"><hp:offset left=\"1417\" right=\"1417\" top=\"1417\" bottom=\"1417\"/></hp:pageBorderFill><hp:pageBorderFill type=\"ODD\" borderFillIDRef=\"1\" textBorder=\"PAPER\" headerInside=\"0\" footerInside=\"0\" fillArea=\"PAPER\"><hp:offset left=\"1417\" right=\"1417\" top=\"1417\" bottom=\"1417\"/></hp:pageBorderFill></hp:secPr><hp:ctrl><hp:colPr id=\"\" type=\"NEWSPAPER\" layout=\"LEFT\" colCount=\"1\" sameSz=\"1\" sameGap=\"0\"/></hp:ctrl></hp:run><hp:run charPrIDRef=\"3\"><hp:ctrl><hp:pageNum pos=\"BOTTOM_CENTER\" formatType=\"DIGIT\" sideChar=\"-\"/></hp:ctrl><hp:tbl id=\"⟦ID⟧\" zOrder=\"0\" numberingType=\"TABLE\" textWrap=\"TOP_AND_BOTTOM\" textFlow=\"BOTH_SIDES\" lock=\"0\" dropcapstyle=\"None\" pageBreak=\"TABLE\" repeatHeader=\"1\" rowCnt=\"⟦ROWS⟧\" colCnt=\"5\" cellSpacing=\"0\" borderFillIDRef=\"6\" noAdjust=\"1\"><hp:sz width=\"48143\" widthRelTo=\"ABSOLUTE\" height=\"⟦TBLH⟧\" heightRelTo=\"ABSOLUTE\" protect=\"0\"/><hp:pos treatAsChar=\"1\" affectLSpacing=\"0\" flowWithText=\"0\" allowOverlap=\"0\" holdAnchorAndSO=\"1\" vertRelTo=\"PARA\" horzRelTo=\"PARA\" vertAlign=\"TOP\" horzAlign=\"LEFT\" vertOffset=\"0\" horzOffset=\"0\"/><hp:outMargin left=\"0\" right=\"0\" top=\"0\" bottom=\"0\"/><hp:inMargin left=\"0\" right=\"0\" top=\"0\" bottom=\"0\"/><hp:tr><hp:tc name=\"\" header=\"0\" hasMargin=\"1\" protect=\"0\" editable=\"0\" dirty=\"0\" borderFillIDRef=\"4\"><hp:subList id=\"\" textDirection=\"HORIZONTAL\" lineWrap=\"BREAK\" vertAlign=\"CENTER\" linkListIDRef=\"0\" linkListNextIDRef=\"0\" textWidth=\"0\" textHeight=\"0\" hasTextRef=\"0\" hasNumRef=\"0\"><hp:p id=\"2147483648\" paraPrIDRef=\"10\" styleIDRef=\"0\" pageBreak=\"0\" columnBreak=\"0\" merged=\"0\"><hp:run charPrIDRef=\"0\"><hp:t> </hp:t></hp:run><hp:run charPrIDRef=\"1\"><hp:pic id=\"⟦ID⟧\" zOrder=\"1\" numberingType=\"NONE\" textWrap=\"TOP_AND_BOTTOM\" textFlow=\"BOTH_SIDES\" lock=\"0\" dropcapstyle=\"None\" href=\"\" groupLevel=\"0\" reverse=\"0\"><hp:offset x=\"0\" y=\"0\"/><hp:orgSz width=\"30000\" height=\"4260\"/><hp:curSz width=\"10804\" height=\"2216\"/><hp:flip horizontal=\"0\" vertical=\"0\"/><hp:rotationInfo angle=\"0\" centerX=\"5402\" centerY=\"1108\" rotateimage=\"1\"/><hp:renderingInfo><hc:transMatrix e1=\"1\" e2=\"0\" e3=\"0\" e4=\"0\" e5=\"1\" e6=\"0\"/><hc:scaMatrix e1=\"0.360133\" e2=\"0\" e3=\"0\" e4=\"0\" e5=\"0.520188\" e6=\"0\"/><hc:rotMatrix e1=\"1\" e2=\"0\" e3=\"0\" e4=\"0\" e5=\"1\" e6=\"0\"/></hp:renderingInfo><hc:img binaryItemIDRef=\"image2\" bright=\"0\" contrast=\"0\" effect=\"REAL_PIC\" alpha=\"0\"/><hp:imgRect><hc:pt0 x=\"0\" y=\"0\"/><hc:pt1 x=\"30000\" y=\"0\"/><hc:pt2 x=\"30000\" y=\"4260\"/><hc:pt3 x=\"0\" y=\"4260\"/></hp:imgRect><hp:imgClip left=\"0\" right=\"19980\" top=\"0\" bottom=\"2880\"/><hp:inMargin left=\"0\" right=\"0\" top=\"0\" bottom=\"0\"/><hp:imgDim dimwidth=\"19980\" dimheight=\"2880\"/><hp:effects/><hp:sz width=\"10804\" widthRelTo=\"ABSOLUTE\" height=\"2216\" heightRelTo=\"ABSOLUTE\" protect=\"0\"/><hp:pos treatAsChar=\"1\" affectLSpacing=\"0\" flowWithText=\"1\" allowOverlap=\"1\" holdAnchorAndSO=\"1\" vertRelTo=\"PARA\" horzRelTo=\"PARA\" vertAlign=\"TOP\" horzAlign=\"LEFT\" vertOffset=\"0\" horzOffset=\"0\"/><hp:outMargin left=\"0\" right=\"0\" top=\"0\" bottom=\"0\"/></hp:pic><hp:t/></hp:run></hp:p></hp:subList><hp:cellAddr colAddr=\"0\" rowAddr=\"0\"/><hp:cellSpan colSpan=\"1\" rowSpan=\"1\"/><hp:cellSz width=\"12085\" height=\"3403\"/><hp:cellMargin left=\"142\" right=\"142\" top=\"142\" bottom=\"142\"/></hp:tc><hp:tc name=\"\" header=\"0\" hasMargin=\"1\" protect=\"0\" editable=\"0\" dirty=\"0\" borderFillIDRef=\"4\"><hp:subList id=\"\" textDirection=\"HORIZONTAL\" lineWrap=\"BREAK\" vertAlign=\"CENTER\" linkListIDRef=\"0\" linkListNextIDRef=\"0\" textWidth=\"0\" textHeight=\"0\" hasTextRef=\"0\" hasNumRef=\"0\"><hp:p id=\"0\" paraPrIDRef=\"10\" styleIDRef=\"0\" pageBreak=\"0\" columnBreak=\"0\" merged=\"0\"><hp:run charPrIDRef=\"11\"><hp:t>보도자료</hp:t></hp:run></hp:p></hp:subList><hp:cellAddr colAddr=\"1\" rowAddr=\"0\"/><hp:cellSpan colSpan=\"1\" rowSpan=\"1\"/><hp:cellSz width=\"10670\" height=\"3403\"/><hp:cellMargin left=\"142\" right=\"142\" top=\"142\" bottom=\"142\"/></hp:tc><hp:tc name=\"\" header=\"0\" hasMargin=\"1\" protect=\"0\" editable=\"0\" dirty=\"0\" borderFillIDRef=\"4\"><hp:subList id=\"\" textDirection=\"HORIZONTAL\" lineWrap=\"BREAK\" vertAlign=\"CENTER\" linkListIDRef=\"0\" linkListNextIDRef=\"0\" textWidth=\"0\" textHeight=\"0\" hasTextRef=\"0\" hasNumRef=\"0\"><hp:p id=\"2147483648\" paraPrIDRef=\"19\" styleIDRef=\"0\" pageBreak=\"0\" columnBreak=\"0\" merged=\"0\"><hp:run charPrIDRef=\"23\"><hp:t>⟦DATE⟧ </hp:t></hp:run><hp:run charPrIDRef=\"24\"><hp:t>⟦EMBARGO⟧</hp:t></hp:run><hp:run charPrIDRef=\"23\"><hp:t>⟦TAIL⟧</hp:t></hp:run></hp:p></hp:subList><hp:cellAddr colAddr=\"2\" rowAddr=\"0\"/><hp:cellSpan colSpan=\"3\" rowSpan=\"1\"/><hp:cellSz width=\"25388\" height=\"3403\"/><hp:cellMargin left=\"142\" right=\"142\" top=\"142\" bottom=\"142\"/></hp:tc></hp:tr>","ROW_R":"<hp:tr><hp:tc name=\"\" header=\"0\" hasMargin=\"1\" protect=\"0\" editable=\"0\" dirty=\"0\" borderFillIDRef=\"4\"><hp:subList id=\"\" textDirection=\"HORIZONTAL\" lineWrap=\"BREAK\" vertAlign=\"CENTER\" linkListIDRef=\"0\" linkListNextIDRef=\"0\" textWidth=\"0\" textHeight=\"0\" hasTextRef=\"0\" hasNumRef=\"0\"><hp:p id=\"2147483648\" paraPrIDRef=\"11\" styleIDRef=\"0\" pageBreak=\"0\" columnBreak=\"0\" merged=\"0\"><hp:run charPrIDRef=\"10\"><hp:t>⟦DEPT⟧</hp:t></hp:run></hp:p></hp:subList><hp:cellAddr colAddr=\"0\" rowAddr=\"⟦RA⟧\"/><hp:cellSpan colSpan=\"2\" rowSpan=\"2\"/><hp:cellSz width=\"22755\" height=\"4421\"/><hp:cellMargin left=\"142\" right=\"142\" top=\"142\" bottom=\"142\"/></hp:tc><hp:tc name=\"\" header=\"0\" hasMargin=\"1\" protect=\"0\" editable=\"0\" dirty=\"0\" borderFillIDRef=\"4\"><hp:subList id=\"\" textDirection=\"HORIZONTAL\" lineWrap=\"BREAK\" vertAlign=\"CENTER\" linkListIDRef=\"0\" linkListNextIDRef=\"0\" textWidth=\"0\" textHeight=\"0\" hasTextRef=\"0\" hasNumRef=\"0\"><hp:p id=\"2147483648\" paraPrIDRef=\"11\" styleIDRef=\"0\" pageBreak=\"0\" columnBreak=\"0\" merged=\"0\"><hp:run charPrIDRef=\"10\"><hp:t>⟦R1⟧</hp:t></hp:run></hp:p></hp:subList><hp:cellAddr colAddr=\"2\" rowAddr=\"⟦RA⟧\"/><hp:cellSpan colSpan=\"1\" rowSpan=\"1\"/><hp:cellSz width=\"11339\" height=\"2372\"/><hp:cellMargin left=\"142\" right=\"142\" top=\"283\" bottom=\"283\"/></hp:tc><hp:tc name=\"\" header=\"0\" hasMargin=\"1\" protect=\"0\" editable=\"0\" dirty=\"0\" borderFillIDRef=\"4\"><hp:subList id=\"\" textDirection=\"HORIZONTAL\" lineWrap=\"BREAK\" vertAlign=\"CENTER\" linkListIDRef=\"0\" linkListNextIDRef=\"0\" textWidth=\"0\" textHeight=\"0\" hasTextRef=\"0\" hasNumRef=\"0\"><hp:p id=\"2147483648\" paraPrIDRef=\"11\" styleIDRef=\"0\" pageBreak=\"0\" columnBreak=\"0\" merged=\"0\"><hp:run charPrIDRef=\"10\"><hp:t>⟦R2⟧</hp:t></hp:run></hp:p></hp:subList><hp:cellAddr colAddr=\"3\" rowAddr=\"⟦RA⟧\"/><hp:cellSpan colSpan=\"1\" rowSpan=\"1\"/><hp:cellSz width=\"5595\" height=\"2372\"/><hp:cellMargin left=\"142\" right=\"142\" top=\"283\" bottom=\"283\"/></hp:tc><hp:tc name=\"\" header=\"0\" hasMargin=\"1\" protect=\"0\" editable=\"0\" dirty=\"0\" borderFillIDRef=\"4\"><hp:subList id=\"\" textDirection=\"HORIZONTAL\" lineWrap=\"BREAK\" vertAlign=\"CENTER\" linkListIDRef=\"0\" linkListNextIDRef=\"0\" textWidth=\"0\" textHeight=\"0\" hasTextRef=\"0\" hasNumRef=\"0\"><hp:p id=\"2147483648\" paraPrIDRef=\"11\" styleIDRef=\"0\" pageBreak=\"0\" columnBreak=\"0\" merged=\"0\"><hp:run charPrIDRef=\"10\"><hp:t>⟦R3⟧</hp:t></hp:run></hp:p></hp:subList><hp:cellAddr colAddr=\"4\" rowAddr=\"⟦RA⟧\"/><hp:cellSpan colSpan=\"1\" rowSpan=\"1\"/><hp:cellSz width=\"8454\" height=\"2372\"/><hp:cellMargin left=\"142\" right=\"142\" top=\"283\" bottom=\"283\"/></hp:tc></hp:tr>","ROW_D":"<hp:tr><hp:tc name=\"\" header=\"0\" hasMargin=\"1\" protect=\"0\" editable=\"0\" dirty=\"0\" borderFillIDRef=\"4\"><hp:subList id=\"\" textDirection=\"HORIZONTAL\" lineWrap=\"BREAK\" vertAlign=\"CENTER\" linkListIDRef=\"0\" linkListNextIDRef=\"0\" textWidth=\"0\" textHeight=\"0\" hasTextRef=\"0\" hasNumRef=\"0\"><hp:p id=\"2147483648\" paraPrIDRef=\"11\" styleIDRef=\"0\" pageBreak=\"0\" columnBreak=\"0\" merged=\"0\"><hp:run charPrIDRef=\"10\"><hp:t>⟦D1⟧</hp:t></hp:run></hp:p></hp:subList><hp:cellAddr colAddr=\"2\" rowAddr=\"⟦RB⟧\"/><hp:cellSpan colSpan=\"1\" rowSpan=\"1\"/><hp:cellSz width=\"11339\" height=\"2049\"/><hp:cellMargin left=\"142\" right=\"142\" top=\"283\" bottom=\"283\"/></hp:tc><hp:tc name=\"\" header=\"0\" hasMargin=\"1\" protect=\"0\" editable=\"0\" dirty=\"0\" borderFillIDRef=\"4\"><hp:subList id=\"\" textDirection=\"HORIZONTAL\" lineWrap=\"BREAK\" vertAlign=\"CENTER\" linkListIDRef=\"0\" linkListNextIDRef=\"0\" textWidth=\"0\" textHeight=\"0\" hasTextRef=\"0\" hasNumRef=\"0\"><hp:p id=\"2147483648\" paraPrIDRef=\"11\" styleIDRef=\"0\" pageBreak=\"0\" columnBreak=\"0\" merged=\"0\"><hp:run charPrIDRef=\"10\"><hp:t>⟦D2⟧</hp:t></hp:run></hp:p></hp:subList><hp:cellAddr colAddr=\"3\" rowAddr=\"⟦RB⟧\"/><hp:cellSpan colSpan=\"1\" rowSpan=\"1\"/><hp:cellSz width=\"5595\" height=\"2049\"/><hp:cellMargin left=\"142\" right=\"142\" top=\"283\" bottom=\"283\"/></hp:tc><hp:tc name=\"\" header=\"0\" hasMargin=\"1\" protect=\"0\" editable=\"0\" dirty=\"0\" borderFillIDRef=\"4\"><hp:subList id=\"\" textDirection=\"HORIZONTAL\" lineWrap=\"BREAK\" vertAlign=\"CENTER\" linkListIDRef=\"0\" linkListNextIDRef=\"0\" textWidth=\"0\" textHeight=\"0\" hasTextRef=\"0\" hasNumRef=\"0\"><hp:p id=\"2147483648\" paraPrIDRef=\"11\" styleIDRef=\"0\" pageBreak=\"0\" columnBreak=\"0\" merged=\"0\"><hp:run charPrIDRef=\"10\"><hp:t>⟦D3⟧</hp:t></hp:run></hp:p></hp:subList><hp:cellAddr colAddr=\"4\" rowAddr=\"⟦RB⟧\"/><hp:cellSpan colSpan=\"1\" rowSpan=\"1\"/><hp:cellSz width=\"8454\" height=\"2049\"/><hp:cellMargin left=\"142\" right=\"142\" top=\"283\" bottom=\"283\"/></hp:tc></hp:tr>","HEAD_POST":"</hp:tbl><hp:t/></hp:run></hp:p>","H_ROW0":3403,"H_DEPT":4421,"SUBP":"<hp:p id=\"0\" paraPrIDRef=\"28\" styleIDRef=\"0\" pageBreak=\"0\" columnBreak=\"0\" merged=\"0\"><hp:run charPrIDRef=\"25\"><hp:t>⟦SUB⟧</hp:t></hp:run></hp:p>","TITLE":"<hp:p id=\"2147483648\" paraPrIDRef=\"25\" styleIDRef=\"0\" pageBreak=\"0\" columnBreak=\"0\" merged=\"0\"><hp:run charPrIDRef=\"13\"><hp:tbl id=\"⟦ID⟧\" zOrder=\"2\" numberingType=\"TABLE\" textWrap=\"TOP_AND_BOTTOM\" textFlow=\"BOTH_SIDES\" lock=\"0\" dropcapstyle=\"None\" pageBreak=\"CELL\" repeatHeader=\"1\" rowCnt=\"1\" colCnt=\"1\" cellSpacing=\"0\" borderFillIDRef=\"8\" noAdjust=\"0\"><hp:sz width=\"48209\" widthRelTo=\"ABSOLUTE\" height=\"9117\" heightRelTo=\"ABSOLUTE\" protect=\"0\"/><hp:pos treatAsChar=\"1\" affectLSpacing=\"0\" flowWithText=\"1\" allowOverlap=\"0\" holdAnchorAndSO=\"0\" vertRelTo=\"PARA\" horzRelTo=\"PARA\" vertAlign=\"TOP\" horzAlign=\"LEFT\" vertOffset=\"0\" horzOffset=\"0\"/><hp:outMargin left=\"0\" right=\"0\" top=\"0\" bottom=\"0\"/><hp:inMargin left=\"141\" right=\"141\" top=\"141\" bottom=\"141\"/><hp:tr><hp:tc name=\"\" header=\"0\" hasMargin=\"0\" protect=\"0\" editable=\"0\" dirty=\"0\" borderFillIDRef=\"7\"><hp:subList id=\"\" textDirection=\"HORIZONTAL\" lineWrap=\"BREAK\" vertAlign=\"CENTER\" linkListIDRef=\"0\" linkListNextIDRef=\"0\" textWidth=\"0\" textHeight=\"0\" hasTextRef=\"0\" hasNumRef=\"0\"><hp:p id=\"2147483648\" paraPrIDRef=\"28\" styleIDRef=\"0\" pageBreak=\"0\" columnBreak=\"0\" merged=\"0\"><hp:run charPrIDRef=\"27\"><hp:t>⟦TITLE⟧</hp:t></hp:run></hp:p>⟦SUBS⟧</hp:subList><hp:cellAddr colAddr=\"0\" rowAddr=\"0\"/><hp:cellSpan colSpan=\"1\" rowSpan=\"1\"/><hp:cellSz width=\"48209\" height=\"9117\"/><hp:cellMargin left=\"141\" right=\"141\" top=\"141\" bottom=\"141\"/></hp:tc></hp:tr></hp:tbl><hp:t/></hp:run></hp:p>","AFTER_TITLE":"<hp:p id=\"2147483648\" paraPrIDRef=\"30\" styleIDRef=\"0\" pageBreak=\"0\" columnBreak=\"0\" merged=\"0\"><hp:run charPrIDRef=\"14\"/></hp:p>","L1":"<hp:p id=\"2147483648\" paraPrIDRef=\"32\" styleIDRef=\"0\" pageBreak=\"0\" columnBreak=\"0\" merged=\"0\"><hp:run charPrIDRef=\"15\"><hp:t>⟦T⟧</hp:t></hp:run></hp:p>","L2":"<hp:p id=\"2147483648\" paraPrIDRef=\"33\" styleIDRef=\"0\" pageBreak=\"0\" columnBreak=\"0\" merged=\"0\"><hp:run charPrIDRef=\"20\"><hp:t>⟦T⟧</hp:t></hp:run></hp:p>","GAP":"<hp:p id=\"2147483648\" paraPrIDRef=\"31\" styleIDRef=\"0\" pageBreak=\"0\" columnBreak=\"0\" merged=\"0\"><hp:run charPrIDRef=\"20\"/></hp:p>","secOpen":"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\" ?><hs:sec xmlns:ha=\"http://www.hancom.co.kr/hwpml/2011/app\" xmlns:hp=\"http://www.hancom.co.kr/hwpml/2011/paragraph\" xmlns:hp10=\"http://www.hancom.co.kr/hwpml/2016/paragraph\" xmlns:hs=\"http://www.hancom.co.kr/hwpml/2011/section\" xmlns:hc=\"http://www.hancom.co.kr/hwpml/2011/core\" xmlns:hh=\"http://www.hancom.co.kr/hwpml/2011/head\" xmlns:hhs=\"http://www.hancom.co.kr/hwpml/2011/history\" xmlns:hm=\"http://www.hancom.co.kr/hwpml/2011/master-page\" xmlns:hpf=\"http://www.hancom.co.kr/schema/2011/hpf\" xmlns:dc=\"http://purl.org/dc/elements/1.1/\" xmlns:opf=\"http://www.idpf.org/2007/opf/\" xmlns:ooxmlchart=\"http://www.hancom.co.kr/hwpml/2016/ooxmlchart\" xmlns:hwpunitchar=\"http://www.hancom.co.kr/hwpml/2016/HwpUnitChar\" xmlns:epub=\"http://www.idpf.org/2007/ops\" xmlns:config=\"urn:oasis:names:tc:opendocument:xmlns:config:1.0\">","version":"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\" ?><hv:HCFVersion xmlns:hv=\"http://www.hancom.co.kr/hwpml/2011/version\" tagetApplication=\"WORDPROCESSOR\" major=\"5\" minor=\"1\" micro=\"1\" buildNumber=\"0\" os=\"1\" xmlVersion=\"1.5\" application=\"Hancom Office Hangul\" appVersion=\"13, 0, 0, 3050 WIN32LEWindows_10\"/>","settings":"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\" ?><ha:HWPApplicationSetting xmlns:ha=\"http://www.hancom.co.kr/hwpml/2011/app\" xmlns:config=\"urn:oasis:names:tc:opendocument:xmlns:config:1.0\"><ha:CaretPosition listIDRef=\"0\" paraIDRef=\"0\" pos=\"0\"/><config:config-item-set name=\"PrintInfo\"><config:config-item name=\"PrintAutoFootNote\" type=\"boolean\">false</config:config-item><config:config-item name=\"PrintAutoHeadNote\" type=\"boolean\">false</config:config-item><config:config-item name=\"PrintMethod\" type=\"short\">0</config:config-item><config:config-item name=\"OverlapSize\" type=\"short\">0</config:config-item><config:config-item name=\"PrintCropMark\" type=\"short\">0</config:config-item><config:config-item name=\"BinderHoleType\" type=\"short\">0</config:config-item><config:config-item name=\"ZoomX\" type=\"short\">100</config:config-item><config:config-item name=\"ZoomY\" type=\"short\">100</config:config-item></config:config-item-set></ha:HWPApplicationSetting>","container":"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\" ?><ocf:container xmlns:ocf=\"urn:oasis:names:tc:opendocument:xmlns:container\" xmlns:hpf=\"http://www.hancom.co.kr/schema/2011/hpf\"><ocf:rootfiles><ocf:rootfile full-path=\"Contents/content.hpf\" media-type=\"application/hwpml-package+xml\"/><ocf:rootfile full-path=\"Preview/PrvText.txt\" media-type=\"text/plain\"/><ocf:rootfile full-path=\"META-INF/container.rdf\" media-type=\"application/rdf+xml\"/></ocf:rootfiles></ocf:container>","rdf":"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\" ?><rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"><rdf:Description rdf:about=\"\"><ns0:hasPart xmlns:ns0=\"http://www.hancom.co.kr/hwpml/2016/meta/pkg#\" rdf:resource=\"Contents/header.xml\"/></rdf:Description><rdf:Description rdf:about=\"Contents/header.xml\"><rdf:type rdf:resource=\"http://www.hancom.co.kr/hwpml/2016/meta/pkg#HeaderFile\"/></rdf:Description><rdf:Description rdf:about=\"\"><ns0:hasPart xmlns:ns0=\"http://www.hancom.co.kr/hwpml/2016/meta/pkg#\" rdf:resource=\"Contents/section0.xml\"/></rdf:Description><rdf:Description rdf:about=\"Contents/section0.xml\"><rdf:type rdf:resource=\"http://www.hancom.co.kr/hwpml/2016/meta/pkg#SectionFile\"/></rdf:Description><rdf:Description rdf:about=\"\"><rdf:type rdf:resource=\"http://www.hancom.co.kr/hwpml/2016/meta/pkg#Document\"/></rdf:Description></rdf:RDF>","manifest":"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\" ?><odf:manifest xmlns:odf=\"urn:oasis:names:tc:opendocument:xmlns:manifest:1.0\"/>","header":"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","logo":"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","titleBg":"iVBORw0KGgoAAAANSUhEUgAABAAAAAEkCAYAAACxGEMEAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAiMSURBVHhe7d1BLqttGIDhrx024qgwtAoxZMTW2IDdmIgwZA12wExCoietNj9+zljd15UIfb9YwHM/r89oPB7P/vz5M4xGowEAAABYT/O5/uHhYbi/vx/29vaWp8Mwm80Wz0bT6XR2fX09TCaTxQMhAAAAANbT4eHhcHNz8yEArIy2t7dnt7e3w8bGxvLozaoQAAAAAOvh4OBguLq6+jIAjJff/8fwDwAAAOtlvsz/ziIAGPYBAABg/f1rvv/2BgAAAACwPubb/3/dAFi8A+Du7m7xEkA3AQAAAGD9rN7jt7+/P5ydnQ27u7vLJ2+3Ao6Ojv67AWD4BwAAgPX0fqZ/eXn58PX8/Lw49ycAAAAAECAAAAAAQIAAAAAAAAECAAAAAAQIAAAAABAgAAAAAECAAAAAAAABAgAAAAAECAAAAAAQIAAAAABAgAAAAAAAAQIAAAAABAgAAAAAECAAAAAAQIAAAAAAAAECAAAAAAQIAAAAABAgAAAAAECAAAAAAAABAgAAAAAECAAAAAAQIAAAAABAgAAAAAAAAQIAAAAABAgAAAAAECAAAAAAQIAAAAAAAAECAAAAAAQIAAAAABAgAAAAAECAAAAAAAABAgAAAAAECAAAAAAQIAAAAABAgAAAAAAAAQIAAAAABAgAAAAAECAAAAAAQIAAAAAAAAECAAAAAAQIAAAAABAgAAAAAECAAAAAAAABAgAAAAAECAAAAAAQIAAAAABAgAAAAAAAAQIAAAAABAgAAAAAECAAAAAAQIAAAAAAAAECAAAAAAQIAAAAABAgAAAAAECAAAAAAAABAgAAAAAECAAAAAAQIAAAAABAgAAAAAAAAQIAAAAABAgAAAAAECAAAAAAQIAAAAAAAAECAAAAAAQIAAAAABAgAAAAAECAAAAAAAABAgAAAAAECAAAAAAQIAAAAABAgAAAAAAAAQIAAAAABAgAAAAAECAAAAAAQIAAAAAAAAECAAAAAAQIAAAAABAgAAAAAECAAAAAAAABAgAAAAAECAAAAAAQIAAAAABAgAAAAAAAAQIAAAAABAgAAAAAECAAAAAAQIAAAAAAAAECAAAAAAQIAAAAABAgAAAAAECAAAAAAAABAgAAAAAECAAAAAAQIAAAAABAgAAAAAAAAQIAAAAABAgAAAAAECAAAAAAQIAAAAAAAAECAAAAAAQIAAAAABAgAAAAAECAAAAAAAABAgAAAAAECAAAAAAQIAAAAABAgAAAAAAAAQIAAAAABAgAAAAAECAAAAAAQIAAAAAAAAECAAAAAAQIAAAAABAgAAAAAECAAAAAAAABAgAAAAAECAAAAAAQIAAAAABAgAAAAAAAAQIAAAAABAgAAAAAECAAAAAAQIAAAAAAAAECAAAAAAQIAAAAABAgAAAAAECAAAAAAAABAgAAAAAECAAAAAAQIAAAAABAgAAAAAAAAQIAAAAABAgAAAAAECAAAAAAQIAAAAAAAAECAAAAAAQIAAAAABAgAAAAAECAAAAAAAABAgAAAAAECAAAAAAQIAAAAABAgAAAAAAAAQIAAAAABAgAAAAAECAAAAAAQIAAAAAAAAECAAAAAAQIAAAAABAgAAAAAECAAAAAAAABAgAAAAAECAAAAAAQIAAAAABAgAAAAAAAAQIAAAAABAgAAAAAECAAAAAAQIAAAAAAAAECAAAAAAQIAAAAABAgAAAAAECAAAAAAAABAgAAAAAECAAAAAAQIAAAAABAgAAAAAAAAQIAAAAABAgAAAAAECAAAAAAQIAAAAAAAAECAAAAAAQIAAAAABAgAAAAAECAAAAAAAABAgAAAAAECAAAAAAQIAAAAABAgAAAAAAAAQIAAAAABAgAAAAAECAAAAAAQIAAAAAAAAECAAAAAAQIAAAAABAgAAAAAECAAAAAAAABAgAAAAAECAAAAAAQIAAAAABAgAAAAAAAAQIAAAAABAgAAAAAECAAAAAAQIAAAAAAAAECAAAAAAQIAAAAABAgAAAAAECAAAAAAAABAgAAAAAECAAAAAAQIAAAAABAgAAAAAAAAQIAAAAABAgAAAAAECAAAAAAQIAAAAAAAAECAAAAAAQIAAAAABAgAAAAAECAAAAAAAABAgAAAAAECAAAAAAQIAAAAABAgAAAAAAAAQIAAAAABAgAAAAAECAAAAAAQIAAAAAAAAECAAAAAAQIAAAAABAgAAAAAECAAAAAAAABAgAAAAAECAAAAAAQIAAAAABAgAAAAAAAAQIAAAAABAgAAAAAECAAAAAAQIAAAAAAAAECAAAAAAQIAAAAABAgAAAAAECAAAAAAAABAgAAAAAECAAAAAAQIAAAAABAgAAAAAAAAQIAAAAABAgAAAAAECAAAAAAQIAAAAAAAAECAAAAAAQIAAAAABAgAAAAAECAAAAAAAABAgAAAAAECAAAAAAQIAAAAABAgAAAAAAAAQIAAAAABAgAAAAAECAAAAAAQIAAAAAAAAECAAAAAAQIAAAAABAgAAAAAECAAAAAAAABAgAAAAAECAAAAAAQIAAAAABAgAAAAAAAAQIAAAAABAgAAAAAECAAAAAAQIAAAAAAAAECAAAAAAQIAAAAABAgAAAAAECAAAAAAAABAgAAAAAECAAAAAAQ8GUAGI1Gy58AAACA32ARAGaz2eLDyufPAAAAwHobz7f9Nv4AAADwu42m0+ns4uJimEwmNv8AAACwpubL/ZOTk+H09HTY2dlZnr45Pj4eRltbW7PNzc0PtwBWIUAQAAAAgPXx+Pg4nJ+fLwLAfM5fzfWLAPD6+jr7PPxfXl4OT09PyxMAAADgJ5vP8quB//2MvzIPAIt3AHze9H/3CwAAAMDPs5rtx+Pv/9v/4slXw/7nKAAAAAD8XF8t+N/7Pg0AAAAAv8aXAcD2HwAAAH4XNwAAAADg1xuGv+Lyg5wQOeNvAAAAAElFTkSuQmCC","hpfOpen":"<opf:package xmlns:ha=\"http://www.hancom.co.kr/hwpml/2011/app\" xmlns:hp=\"http://www.hancom.co.kr/hwpml/2011/paragraph\" xmlns:hp10=\"http://www.hancom.co.kr/hwpml/2016/paragraph\" xmlns:hs=\"http://www.hancom.co.kr/hwpml/2011/section\" xmlns:hc=\"http://www.hancom.co.kr/hwpml/2011/core\" xmlns:hh=\"http://www.hancom.co.kr/hwpml/2011/head\" xmlns:hhs=\"http://www.hancom.co.kr/hwpml/2011/history\" xmlns:hm=\"http://www.hancom.co.kr/hwpml/2011/master-page\" xmlns:hpf=\"http://www.hancom.co.kr/schema/2011/hpf\" xmlns:dc=\"http://purl.org/dc/elements/1.1/\" xmlns:opf=\"http://www.idpf.org/2007/opf/\" xmlns:ooxmlchart=\"http://www.hancom.co.kr/hwpml/2016/ooxmlchart\" xmlns:hwpunitchar=\"http://www.hancom.co.kr/hwpml/2016/HwpUnitChar\" xmlns:epub=\"http://www.idpf.org/2007/ops\" xmlns:config=\"urn:oasis:names:tc:opendocument:xmlns:config:1.0\" version=\"\" unique-identifier=\"\" id=\"\">"};
+const $=id=>document.getElementById(id);
+function lines(s){return s.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function fill(tpl,map){return tpl.replace(/⟦(\w+)⟧/g,(m,k)=>k in map?esc(map[k]):m);}
+let IDN=1000;
+function ids(x){return x.replace(/⟦ID⟧/g,()=>String(++IDN));}
+function hpf(title){
+  const now=new Date().toISOString().replace(/\.\d+Z$/,'Z');
+  return '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>'+TPL.hpfOpen+'<opf:metadata><opf:title>'+esc(title)+'</opf:title><opf:language>ko</opf:language><opf:meta name="creator" content="text"/><opf:meta name="subject" content="text"/><opf:meta name="description" content="text"/><opf:meta name="lastsaveby" content="text"/><opf:meta name="CreatedDate" content="text">'+now+'</opf:meta><opf:meta name="ModifiedDate" content="text">'+now+'</opf:meta><opf:meta name="keyword" content="text"/></opf:metadata>'
+    +'<opf:manifest><opf:item id="image1" href="BinData/image1.png" media-type="image/png" isEmbeded="1"/><opf:item id="header" href="Contents/header.xml" media-type="application/xml"/><opf:item id="image2" href="BinData/image2.png" media-type="image/png" isEmbeded="1"/><opf:item id="section0" href="Contents/section0.xml" media-type="application/xml"/><opf:item id="settings" href="settings.xml" media-type="application/xml"/></opf:manifest>'
+    +'<opf:spine><opf:itemref idref="header" linear="yes"/><opf:itemref idref="section0" linear="yes"/></opf:spine></opf:package>';
+}
+function b64bytes(b){return Uint8Array.from(atob(b),c=>c.charCodeAt(0));}
+async function inflate(b64){
+  return new Uint8Array(await new Response(new Blob([b64bytes(b64)]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).arrayBuffer());
+}
+async function deflate(u8){
+  return new Uint8Array(await new Response(new Blob([u8]).stream().pipeThrough(new CompressionStream('deflate-raw'))).arrayBuffer());
+}
+const CRC=(()=>{const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0;}return t;})();
+function crc32(u8){let c=0xFFFFFFFF;for(let i=0;i<u8.length;i++)c=CRC[(c^u8[i])&255]^(c>>>8);return (c^0xFFFFFFFF)>>>0;}
+// ZIP 만들기. mimetype은 맨 앞에 압축하지 않고 넣어야 합니다.
+async function makeZip(files){
+  const enc=new TextEncoder(), parts=[], central=[]; let off=0;
+  for(const [name,data,store] of files){
+    const raw=typeof data==='string'?enc.encode(data):data, nm=enc.encode(name);
+    const body=store?raw:await deflate(raw), crc=crc32(raw), method=store?0:8;
+    const lh=new DataView(new ArrayBuffer(30));
+    lh.setUint32(0,0x04034b50,true);lh.setUint16(4,20,true);lh.setUint16(6,0x0800,true);lh.setUint16(8,method,true);
+    lh.setUint32(14,crc,true);lh.setUint32(18,body.length,true);lh.setUint32(22,raw.length,true);lh.setUint16(26,nm.length,true);
+    parts.push(new Uint8Array(lh.buffer),nm,body);
+    const ch=new DataView(new ArrayBuffer(46));
+    ch.setUint32(0,0x02014b50,true);ch.setUint16(4,20,true);ch.setUint16(6,20,true);ch.setUint16(8,0x0800,true);ch.setUint16(10,method,true);
+    ch.setUint32(16,crc,true);ch.setUint32(20,body.length,true);ch.setUint32(24,raw.length,true);ch.setUint16(28,nm.length,true);ch.setUint32(42,off,true);
+    central.push(new Uint8Array(ch.buffer),nm);
+    off+=30+nm.length+body.length;
+  }
+  const csize=central.reduce((a,x)=>a+x.length,0), end=new DataView(new ArrayBuffer(22));
+  end.setUint32(0,0x06054b50,true);end.setUint16(8,files.length,true);end.setUint16(10,files.length,true);end.setUint32(12,csize,true);end.setUint32(16,off,true);
+  return new Blob([...parts,...central,new Uint8Array(end.buffer)],{type:'application/hwp+zip'});
+}
+
+// ===================== 보고서 =====================
+const FIELDS=['title','subtitle','date','dept','writer','body'];
+const DRAFT_KEY='rp_draft';
+function store(k,v){try{v==null?localStorage.removeItem(k):localStorage.setItem(k,v);}catch(e){}}
+function load(k){try{return localStorage.getItem(k);}catch(e){return null;}}
+function data(){const d={};FIELDS.forEach(k=>d[k]=$(k).value.trim());return d;}
+function todayStr(){const t=new Date(),w='일월화수목금토'[t.getDay()];return t.getFullYear()+'. '+(t.getMonth()+1)+'. '+t.getDate()+'.('+w+')';}
+
+// 본문: 한 줄이 한 문단. 줄 앞 기호로 단계를 정합니다.
+//  1. / Ⅰ. / # → 큰 제목(h), □ 또는 기호 없음 → 1단계, ○·ㅇ·o → 2단계, - → 3단계, ※·* → 참고
+const RX={
+  h:/^\s*(?:#+\s*|(?=(?:\d{1,2}|[ⅠⅡⅢⅣⅤⅥⅦⅧⅨⅩ]{1,4})\s*[.)]\s))/,
+  l1:/^\s*[□■❏◻]\s*/,
+  l2:/^\s*(?:[○◦❍]\s*|[ㅇo]\s+)/,
+  l3:/^\s*[-–·]\s*/,
+  nt:/^\s*(?:※|\*)\s*/
+};
+const MARK={l1:'□ ',l2:'○ ',l3:'- ',nt:'※ ',h:''};
+function bodyItems(s){
+  return lines(s).map(l=>{
+    for(const k of ['h','nt','l1','l2','l3']) if(RX[k].test(l)) return [k,l.replace(RX[k],'').trim()];
+    return ['l1',l];
+  }).filter(x=>x[1]);
+}
+function cntBody(s){return bodyItems(s).map(x=>x[1]).join('').length;}
+function metaLines(d){
+  return [[d.date,d.dept].filter(Boolean).join(' | '),d.writer].filter(Boolean);
+}
+
+function render(){
+  const d=data();
+  let h='<div class="jt" style="background-image:url(data:image/png;base64,'+TPL.titleBg+')"><div class="tt">'+esc(d.title||'보고서 제목')+'</div>'
+    +(d.subtitle?'<div class="st">- '+esc(d.subtitle.replace(/^[-–\s]+|[-–\s]+$/g,''))+' -</div>':'')+'</div>';
+  h+=metaLines(d).map(x=>'<div class="rmeta">'+esc(x)+'</div>').join('');
+  h+='<div class="rb" style="margin-top:14px">'+bodyItems(d.body).map(([k,t])=>'<p class="'+k+'">'+esc(MARK[k]+t)+'</p>').join('')+'</div>';
+  h+='<div class="pn">- 1 -</div>';
+  $('paper').innerHTML=h;
+  const n=cntBody($('body').value); $('cntBody').textContent=n?'· 공백 포함 '+n.toLocaleString()+'자':'';
+}
+function saveDraft(){ const d={}; FIELDS.forEach(k=>d[k]=$(k).value); store(DRAFT_KEY,JSON.stringify(d)); }
+FIELDS.forEach(k=>$(k).addEventListener('input',()=>{render();saveDraft();}));
+
+// --- HWPX: 보도자료 틀의 글꼴·문단 모양에 보고서용 모양을 덧붙입니다 ---
+// 글자 모양: 28 큰 제목(HY헤드라인M 16pt), 29 2·3단계(휴먼명조 15pt), 30 참고(휴먼명조 13pt), 31 날짜·부서(휴먼명조 14pt)
+// 문단 모양: 48 오른쪽 정렬, 49 큰 제목, 50 □, 51 ○, 52 -, 53 ※  (값은 HWPUNIT, 1pt=100)
+const C={h:28,l1:20,l2:29,l3:29,nt:30,meta:31}, P={meta:48,h:49,l1:50,l2:51,l3:52,nt:53};
+function extendHeader(xml){
+  const p32=xml.match(/<hh:paraPr id="32"[\s\S]*?<\/hh:paraPr>/)[0];
+  const c20=xml.match(/<hh:charPr id="20"[\s\S]*?<\/hh:charPr>/)[0];
+  const mkP=(id,o)=>{ let k=0; // 앞쪽(case)은 실제 값, 뒤쪽(default)은 원본 틀처럼 두 배 값
+    return p32.replace('id="32"','id="'+id+'"').replace('horizontal="JUSTIFY"','horizontal="'+(o.align||'JUSTIFY')+'"')
+      .replace(/<hh:margin>[\s\S]*?<\/hh:margin>/g,()=>{const f=k++?2:1;
+        return '<hh:margin><hc:intent value="'+(o.intent||0)*f+'" unit="HWPUNIT"/><hc:left value="'+(o.left||0)*f+'" unit="HWPUNIT"/><hc:right value="0" unit="HWPUNIT"/><hc:prev value="'+(o.prev||0)*f+'" unit="HWPUNIT"/><hc:next value="0" unit="HWPUNIT"/></hh:margin>';});
+  };
+  const mkC=(id,o)=>{ const f=String(o.font==null?4:o.font);
+    let s=c20.replace('id="20"','id="'+id+'"').replace('height="1600"','height="'+o.h+'"')
+      .replace(/<hh:fontRef[^>]*\/>/,'<hh:fontRef hangul="'+f+'" latin="'+f+'" hanja="'+f+'" japanese="'+f+'" other="'+f+'" symbol="'+f+'" user="'+f+'"/>');
+    return o.bold?s.replace('<hh:underline','<hh:bold/><hh:underline'):s;
+  };
+  const chars=[mkC(28,{h:1600,font:7}),mkC(29,{h:1500}),mkC(30,{h:1300}),mkC(31,{h:1400})];
+  const paras=[mkP(48,{align:'RIGHT'}),mkP(49,{prev:0}),mkP(50,{intent:-2417,prev:300}),
+    mkP(51,{left:1600,intent:-2250,prev:100}),mkP(52,{left:3850,intent:-1500}),mkP(53,{left:3850,intent:-1950})];
+  return xml
+    .replace(/<hh:charProperties itemCnt="(\d+)">/,(m,n)=>'<hh:charProperties itemCnt="'+(+n+chars.length)+'">')
+    .replace('</hh:charProperties>',chars.join('')+'</hh:charProperties>')
+    .replace(/<hh:paraProperties itemCnt="(\d+)">/,(m,n)=>'<hh:paraProperties itemCnt="'+(+n+paras.length)+'">')
+    .replace('</hh:paraProperties>',paras.join('')+'</hh:paraProperties>');
+}
+function para(p,c,t){return '<hp:p id="2147483648" paraPrIDRef="'+p+'" styleIDRef="0" pageBreak="0" columnBreak="0" merged="0">'+(t?'<hp:run charPrIDRef="'+c+'"><hp:t>'+esc(t)+'</hp:t></hp:run>':'<hp:run charPrIDRef="'+c+'"/>')+'</hp:p>';}
+function sectionXml(d){
+  // 첫 문단: 쪽 설정·쪽 번호만 남기고 보도자료 머리 표는 뺍니다.
+  let out=TPL.secOpen+TPL.HEAD_PRE.slice(0,TPL.HEAD_PRE.indexOf('<hp:tbl'))+'<hp:t/></hp:run></hp:p>';
+  const sub=d.subtitle.replace(/^[-–\s]+|[-–\s]+$/g,'');
+  out+=fill(TPL.TITLE,{TITLE:d.title}).replace('⟦SUBS⟧',()=>sub?fill(TPL.SUBP,{SUB:'- '+sub+' -'}):'')+TPL.AFTER_TITLE;
+  out+=metaLines(d).map(x=>para(P.meta,C.meta,x)).join('');
+  out+=TPL.GAP;
+  out+=bodyItems(d.body).map(([k,t],i)=>(k==='h'&&i>0?TPL.GAP:'')+para(P[k],C[k],MARK[k]+t)).join('');
+  return ids(out)+'</hs:sec>';
+}
+async function build(){
+  const d=data();
+  if(!d.title){ $('msg').innerHTML='<div class="msg err">제목을 먼저 적어 주세요.</div>'; return null; }
+  IDN=1000;
+  const prv=['<'+d.title+(d.subtitle?' - '+d.subtitle+' -':'')+'>'].concat(metaLines(d),bodyItems(d.body).map(([k,t])=>MARK[k]+t)).join('\r\n');
+  const header=extendHeader(new TextDecoder().decode(await inflate(TPL.header)));
+  return makeZip([
+    ['mimetype','application/hwp+zip',true],
+    ['version.xml',TPL.version],
+    ['Contents/header.xml',header],
+    ['Contents/section0.xml',sectionXml(d)],
+    ['settings.xml',TPL.settings],
+    ['Contents/content.hpf',hpf(d.title)],
+    ['BinData/image1.png',b64bytes(TPL.titleBg)],
+    ['BinData/image2.png',b64bytes(TPL.logo)],
+    ['Preview/PrvText.txt',prv],
+    ['META-INF/container.xml',TPL.container],
+    ['META-INF/container.rdf',TPL.rdf],
+    ['META-INF/manifest.xml',TPL.manifest]
+  ]);
+}
+$('dl').onclick=async()=>{
+  try{
+    const blob=await build(); if(!blob) return;
+    const name=(data().title.replace(/[\\/:*?"<>|]/g,'').slice(0,30)||'보고서')+'.hwpx';
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+    $('msg').innerHTML='<div class="msg ok">'+esc(name)+' 를 내려받았습니다. 한글에서 열어 확인해 주세요.</div>';
+  }catch(e){ $('msg').innerHTML='<div class="msg err">만들지 못했습니다: '+esc(e.message)+'</div>'; }
+};
+
+// --- 보고서 종류별 목차 틀 ---
+const KINDS={
+  '결과 보고':['1. 추진 개요','□ 목적: ','□ 기간·장소: ','□ 참석·대상: ','2. 추진 결과','□ ','○ ','3. 성과 및 평가','□ ','4. 향후 계획','□ '],
+  '계획 보고':['1. 추진 배경','□ ','2. 추진 계획','□ 기간: ','□ 대상: ','□ 주요 내용','○ ','3. 소요 예산','□ 총 ○○백만 원 (도비 ○○, 국비 ○○)','4. 추진 일정','□ ','5. 기대 효과','□ '],
+  '현황 보고':['1. 현황','□ ','○ ','2. 문제점','□ ','3. 대응 방안','□ ','4. 향후 계획','□ '],
+  '검토 보고':['1. 검토 배경','□ ','2. 주요 내용','□ ','3. 검토 의견','□ ','○ ','4. 조치 계획','□ '],
+  '회의 결과 보고':['1. 회의 개요','□ 일시: ','□ 장소: ','□ 참석: ','2. 주요 논의 내용','□ ','○ ','3. 결정 사항','□ ','4. 후속 조치','□ '],
+  '동향·상황 보고':['1. 상황 개요','□ 발생 일시·장소: ','□ 주요 내용: ','2. 조치 사항','□ ','3. 향후 대응','□ ']
+};
+$('rkind').innerHTML=Object.keys(KINDS).map(k=>'<option>'+esc(k)+'</option>').join('');
+$('skel').onclick=()=>{
+  if($('body').value.trim()&&!confirm('본문 칸에 적힌 내용을 목차 틀로 바꿀까요?')) return;
+  $('body').value=KINDS[$('rkind').value].join('\n'); render(); saveDraft();
+};
+$('sample').onclick=()=>{
+  const v={title:'겨울철 감귤 출하기 품질 점검 결과 보고',subtitle:'11월 선과장 점검반 운영 결과 (가상 예시)',date:todayStr(),dept:'○○과 (가상)',writer:'○○팀장 김제주 ☎710-0001',
+    body:['1. 추진 개요','□ 목적: 출하 초기 비상품 감귤 유통을 막아 제주 감귤 신뢰도 유지','□ 기간: 2026. 11. 1. ~ 11. 30.(1개월)','□ 대상: 도내 선과장 ○○곳','2. 점검 결과','□ 점검 ○○곳 가운데 ○○곳에서 기준 위반 확인','○ 당도 기준 미달 ○건, 크기 기준 위반 ○건','- 위반 선과장에는 출하 정지와 재선별 조치','※ 위반 내용은 가상 예시임','3. 향후 계획','□ 12월에도 점검반을 이어 운영하고, 위반이 잦은 선과장은 집중 관리','○ 생산자 단체와 품질 기준 교육 ○회 실시 예정'].join('\n')};
+  Object.entries(v).forEach(([k,x])=>$(k).value=x); render(); saveDraft();
+};
+(function(){ let s=null; try{s=JSON.parse(load(DRAFT_KEY)||'null');}catch(e){}
+  if(s) FIELDS.forEach(k=>{ if(typeof s[k]==='string') $(k).value=s[k]; });
+  if(!$('date').value) $('date').value=todayStr(); })();
+render();
+
+// ===================== 자료 업로드 + Claude API =====================
+// 올린 자료는 이 화면 메모리에만 두고, 'AI로 추천받기'를 누를 때만 Anthropic API로 보냅니다.
+const API_URL='https://api.anthropic.com/v1/messages';
+const PRICE={'claude-opus-5-5':[4,20],'claude-sonnet-5-5':[2,10],'claude-haiku-5-5':[0.1,0.5]}; // 100만 토큰당 달러
+const FALLBACK_OK={'claude-opus-5-5':1,'claude-sonnet-5-5':1}; // 거절 시 서버가 다른 모델로 다시 시도
+const IMG_MAX=1568;            // 사진 긴 변을 이 크기로 줄여 보냄 (용량·비용 절약)
+const REQ_LIMIT=30*1024*1024;  // 요청 한 번 최대 크기(32MB)보다 조금 작게
+const FILES=[];                // {name, kind:'image'|'pdf'|'text', b64, media, text, thumb, bytes}
+
+function fmtSize(n){return n>=1048576?(n/1048576).toFixed(1)+'MB':Math.max(1,Math.ceil(n/1024))+'KB';}
+function aiMsg(html,cls){$('aiMsg').innerHTML=html?'<div class="msg '+(cls||'ok')+'">'+html+'</div>':'';}
+function toB64(u8){let s='';for(let i=0;i<u8.length;i+=0x8000)s+=String.fromCharCode.apply(null,u8.subarray(i,i+0x8000));return btoa(s);}
+async function inflateRaw(u8){return new Uint8Array(await new Response(new Blob([u8]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).arrayBuffer());}
+function unxml(s){return s.replace(/&#x([0-9a-f]+);/gi,(m,h)=>String.fromCodePoint(parseInt(h,16))).replace(/&#(\d+);/g,(m,d)=>String.fromCodePoint(+d))
+  .replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&apos;/g,"'").replace(/&amp;/g,'&');}
+
+// --- ZIP 읽기 (HWPX·DOCX·PPTX는 모두 ZIP 묶음) ---
+async function unzip(u8){
+  const dv=new DataView(u8.buffer,u8.byteOffset,u8.byteLength), dec=new TextDecoder();
+  let e=u8.length-22; while(e>=0&&dv.getUint32(e,true)!==0x06054b50)e--;
+  if(e<0) throw new Error('파일이 손상되었거나 형식이 다릅니다');
+  const n=dv.getUint16(e+10,true), map={}; let p=dv.getUint32(e+16,true);
+  for(let i=0;i<n;i++){
+    const method=dv.getUint16(p+10,true), csize=dv.getUint32(p+20,true), nl=dv.getUint16(p+28,true), xl=dv.getUint16(p+30,true), cl=dv.getUint16(p+32,true), lo=dv.getUint32(p+42,true);
+    map[dec.decode(u8.subarray(p+46,p+46+nl))]={method,csize,lo}; p+=46+nl+xl+cl;
+  }
+  return {names:Object.keys(map), async text(name){
+    const f=map[name], s=f.lo+30+dv.getUint16(f.lo+26,true)+dv.getUint16(f.lo+28,true), raw=u8.subarray(s,s+f.csize);
+    return dec.decode(f.method===0?raw:await inflateRaw(raw));
+  }};
+}
+// 문단 끝 태그(pEnd)로 나누고, 그 안의 글자 태그(t) 내용만 모읍니다.
+function xmlParas(xml,pEnd,t){
+  const re=new RegExp('<'+t+'(?=[\\s>])[^>]*>([\\s\\S]*?)</'+t+'>','g');
+  return xml.split(pEnd).map(seg=>{let s='',m;re.lastIndex=0;while((m=re.exec(seg)))s+=m[1].replace(/<[^>]+>/g,'');return unxml(s).trim();}).filter(Boolean);
+}
+const byNum=(a,b)=>(+a.match(/(\d+)\.xml$/)[1])-(+b.match(/(\d+)\.xml$/)[1]);
+async function officeText(u8,ext){
+  const z=await unzip(u8); let parts=[], out=[];
+  if(ext==='hwpx'){ parts=z.names.filter(n=>/^Contents\/section\d+\.xml$/.test(n)).sort(byNum); for(const n of parts) out.push(...xmlParas(await z.text(n),'</hp:p>','hp:t')); }
+  else if(ext==='docx'){ out=xmlParas(await z.text('word/document.xml'),'</w:p>','w:t'); }
+  else if(ext==='pptx'){ parts=z.names.filter(n=>/^ppt\/slides\/slide\d+\.xml$/.test(n)).sort(byNum);
+    for(const [i,n] of parts.entries()){ out.push('[슬라이드 '+(i+1)+']',...xmlParas(await z.text(n),'</a:p>','a:t')); } }
+  if(!out.length) throw new Error('글자를 찾지 못했습니다');
+  return out.join('\n');
+}
+// 사진을 줄여서 JPEG로 (PNG 투명 배경은 흰색으로)
+async function shrinkImage(file){
+  const bmp=await createImageBitmap(file), r=Math.min(1,IMG_MAX/Math.max(bmp.width,bmp.height));
+  const c=document.createElement('canvas'); c.width=Math.round(bmp.width*r); c.height=Math.round(bmp.height*r);
+  const g=c.getContext('2d'); g.fillStyle='#fff'; g.fillRect(0,0,c.width,c.height); g.drawImage(bmp,0,0,c.width,c.height); bmp.close&&bmp.close();
+  const url=c.toDataURL('image/jpeg',0.85);
+  return {b64:url.split(',')[1], thumb:url};
+}
+async function addFiles(list){
+  const bad=[];
+  for(const f of list){
+    const ext=(f.name.split('.').pop()||'').toLowerCase();
+    try{
+      if(FILES.some(x=>x.name===f.name&&x.size===f.size)) continue;
+      if(/^(jpe?g|png|webp|gif)$/.test(ext)||/^image\/(jpeg|png|webp|gif)$/.test(f.type)){
+        const im=await shrinkImage(f); FILES.push({name:f.name,size:f.size,kind:'image',media:'image/jpeg',b64:im.b64,thumb:im.thumb,bytes:im.b64.length});
+      }else if(ext==='pdf'){
+        const b=toB64(new Uint8Array(await f.arrayBuffer())); FILES.push({name:f.name,size:f.size,kind:'pdf',b64:b,bytes:b.length});
+      }else if(/^(txt|md|csv|json)$/.test(ext)){
+        const t=await f.text(); FILES.push({name:f.name,size:f.size,kind:'text',text:t,bytes:t.length*3});
+      }else if(/^(hwpx|docx|pptx)$/.test(ext)){
+        const t=await officeText(new Uint8Array(await f.arrayBuffer()),ext); FILES.push({name:f.name,size:f.size,kind:'text',text:t,bytes:t.length*3,ext});
+      }else if(ext==='hwp'){ bad.push(esc(f.name)+': HWP(옛 형식)는 읽지 못합니다. 한글에서 HWPX나 PDF로 저장해 올려 주세요.'); }
+      else if(/^(heic|heif)$/.test(ext)){ bad.push(esc(f.name)+': 아이폰 HEIC 사진은 JPG로 바꿔 올려 주세요.'); }
+      else bad.push(esc(f.name)+': 지원하지 않는 형식입니다.');
+    }catch(e){ bad.push(esc(f.name)+': 읽지 못했습니다 ('+esc(e.message)+')'); }
+  }
+  renderFiles();
+  aiMsg(bad.join('<br>'),'err');
+}
+function renderFiles(){
+  $('fileList').innerHTML=FILES.map((f,i)=>{
+    const ico=f.kind==='image'?'<img src="'+f.thumb+'" alt="">':'<span class="ico">'+(f.ext||f.kind).toUpperCase()+'</span>';
+    const info=f.kind==='text'?f.text.length.toLocaleString()+'자':fmtSize(f.kind==='image'?f.b64.length*0.75:f.size);
+    return '<li>'+ico+'<span class="nm" title="'+esc(f.name)+'">'+esc(f.name)+'</span><span class="sz">'+info+'</span><button class="light" data-del="'+i+'">빼기</button></li>';
+  }).join('');
+}
+$('fileList').onclick=e=>{const i=e.target.dataset.del; if(i!=null){FILES.splice(+i,1);renderFiles();}};
+$('drop').onclick=()=>$('fileIn').click();
+$('fileIn').onchange=e=>{addFiles([...e.target.files]); e.target.value='';};
+['dragenter','dragover'].forEach(t=>$('drop').addEventListener(t,e=>{e.preventDefault();$('drop').classList.add('over');}));
+['dragleave','drop'].forEach(t=>$('drop').addEventListener(t,e=>{e.preventDefault();$('drop').classList.remove('over');}));
+$('drop').addEventListener('drop',e=>addFiles([...e.dataTransfer.files]));
+// --- API 키·모델 기억 ---
+(function(){ const k=load('pr_apikey'); if(k){$('apikey').value=k;$('remember').checked=true;} else $('apiBox').open=true;
+  const m=load('pr_model'); if(m&&PRICE[m]) $('model').value=m; })();
+$('remember').onchange=()=>store('pr_apikey',$('remember').checked?$('apikey').value.trim():null);
+$('apikey').oninput=()=>{ if($('remember').checked) store('pr_apikey',$('apikey').value.trim()); };
+$('model').onchange=()=>store('pr_model',$('model').value);
+
+async function callClaude(body,useFallback){
+  const h={'content-type':'application/json','x-api-key':$('apikey').value.trim(),'anthropic-version':'2026-10-21','anthropic-dangerous-direct-browser-access':'true'};
+  const b=Object.assign({},body);
+  if(useFallback){ h['anthropic-beta']='server-side-fallback-2026-07-01'; b.fallbacks='default'; }
+  const r=await fetch(API_URL,{method:'POST',headers:h,body:JSON.stringify(b)});
+  const j=await r.json().catch(()=>({}));
+  return {status:r.status,j};
+}
+function apiError(status,j){
+  const m=(j&&j.error&&j.error.message)||'';
+  if(status===401) return 'API 키가 맞지 않습니다. 설정에서 키를 다시 확인해 주세요.';
+  if(status===403) return '이 키로는 쓸 수 없는 기능이나 모델입니다. ('+esc(m)+')';
+  if(status===413) return '보내는 자료가 너무 큽니다. 파일 수를 줄여 주세요.';
+  if(status===429) return '요청이 몰렸거나 사용 한도에 닿았습니다. 잠시 뒤 다시 눌러 주세요.';
+  if(status===529||status>=500) return 'Claude 서버가 바쁩니다. 잠시 뒤 다시 눌러 주세요.';
+  return '요청이 거절되었습니다 ('+status+'): '+esc(m);
+}
+
+// --- 보고서 작성 조건 기억 ---
+(function(){ let s={}; try{s=JSON.parse(load('rp_opts')||'{}');}catch(e){}
+  ['rkind','rlen','rreader','rfocus'].forEach(k=>{ if(s[k]!=null) $(k).value=s[k]; $(k).addEventListener('change',saveROpts); $(k).addEventListener('input',saveROpts); }); })();
+function saveROpts(){ const o={}; ['rkind','rlen','rreader','rfocus'].forEach(k=>o[k]=$(k).value); store('rp_opts',JSON.stringify(o)); }
+
+// --- Claude에게 보낼 지시문 ---
+const SYSTEM=`당신은 한국 지방자치단체(제주특별자치도) 공무원의 내부 보고서 작성을 돕습니다.
+사용자가 올린 자료와 메모만을 근거로 보고서 제목 후보와 개조식 본문 초안을 만듭니다.
+
+[사실 원칙]
+- 자료에 없는 숫자, 사람 이름, 날짜, 장소, 기관명, 예산을 지어내지 않습니다. 필요한데 자료에 없는 정보는 "[확인 필요: 무엇]"으로 비워 두고 checks에도 적습니다.
+- 사진에서 읽히는 것은 쓰되, 짐작은 단정하지 않습니다. 근거 없는 과장 표현은 쓰지 않습니다.
+- 쉬운 우리말을 쓰고, 불필요한 외래어·한자어는 피합니다. 영어 약어는 처음 나올 때 '인공지능(AI)'처럼 씁니다.
+
+[개조식 문체]
+- 문장은 짧게 끊고 명사형으로 끝냅니다: "~함", "~임", "~예정", "~필요", "~추진". '~했다', '~합니다'는 쓰지 않습니다.
+- 한 항목에는 한 가지 내용만 씁니다. 결론·핵심을 먼저, 근거·세부는 아래 단계로 내립니다.
+- 숫자는 아라비아 숫자로, 날짜는 '2026. 11. 4.(수)' 또는 '11. 4.', 금액은 '○○백만 원'처럼 씁니다.
+- 기간·대상·장소처럼 짧은 사실은 "기간: ……"처럼 이름표를 붙여 씁니다.
+
+[본문 body 구조]
+- level "h": 큰 제목(목차). 번호는 붙이지 않습니다(화면에서 1. 2. 3.을 붙임). 3~6개.
+- level "1": □ 1단계. 그 목차의 핵심 사실·판단. 각 큰 제목 아래 1~4개.
+- level "2": ○ 2단계. □를 뒷받침하는 세부 사실·수치. □ 아래 0~4개.
+- level "3": - 3단계. ○의 더 작은 세부. 꼭 필요할 때만.
+- level "note": ※ 참고·단서·출처. 꼭 필요할 때만.
+- 기호(□ ○ - ※)와 번호는 text에 넣지 않습니다. 첫 항목은 반드시 level "h"입니다.
+- 사용자가 고른 보고서 종류에 맞는 목차를 씁니다. 예) 결과 보고: 추진 개요 / 추진 결과 / 성과 및 평가 / 향후 계획. 계획 보고: 추진 배경 / 추진 계획 / 소요 예산 / 추진 일정 / 기대 효과. 회의 결과 보고: 회의 개요 / 주요 논의 내용 / 결정 사항 / 후속 조치.
+- 분량은 사용자가 고른 쪽수에 맞춥니다(A4 1쪽 ≈ 공백 포함 700~900자).
+- 보고 대상이 정해져 있으면 그 사람이 판단·결정하기 쉽게, 결정할 사항이나 건의 사항이 있으면 분명히 씁니다.
+
+[제목 titles: 정확히 3개]
+- "○○ 결과 보고", "○○ 추진 계획"처럼 무엇에 관한 어떤 보고인지 한눈에 드러나는 한 줄. 공백 포함 30자 이내.
+- 3개는 내세우는 점이나 짜임을 서로 다르게 합니다. reason에는 그렇게 지은 까닭을 한 문장으로.
+
+[subtitle]
+- 기간·대상 등을 담은 짧은 부제 한 줄(공백 포함 30자 안팎). 필요 없으면 빈 문자열.
+
+[checks]
+- 담당자가 원자료와 꼭 대조하거나 채워야 할 것을 짧게 나열합니다.`;
+
+const SCHEMA={type:'object',additionalProperties:false,required:['titles','subtitle','body','checks'],properties:{
+  titles:{type:'array',items:{type:'object',additionalProperties:false,required:['text','reason'],properties:{text:{type:'string'},reason:{type:'string'}}}},
+  subtitle:{type:'string'},
+  body:{type:'array',items:{type:'object',additionalProperties:false,required:['level','text'],properties:{level:{type:'string',enum:['h','1','2','3','note']},text:{type:'string'}}}},
+  checks:{type:'array',items:{type:'string'}}
+}};
+
+function buildContent(){
+  const d=data(), blocks=[]; let n=0;
+  FILES.forEach(f=>{
+    if(f.kind==='image'){ blocks.push({type:'text',text:'[사진 '+(++n)+'] 파일명: '+f.name}); blocks.push({type:'image',source:{type:'base64',media_type:f.media,data:f.b64}}); }
+    else if(f.kind==='pdf') blocks.push({type:'document',title:f.name,source:{type:'base64',media_type:'application/pdf',data:f.b64}});
+    else blocks.push({type:'text',text:'[자료 파일: '+f.name+']\n'+f.text});
+  });
+  const info=['보고서 종류: '+$('rkind').value,'분량: '+$('rlen').value,
+    $('rreader').value.trim()?'보고 대상: '+$('rreader').value.trim():'',
+    $('rfocus').value.trim()?'꼭 넣을 표현·강조점: '+$('rfocus').value.trim():'',
+    d.dept?'담당 부서: '+d.dept:'', d.date?'보고 날짜: '+d.date:'',
+    d.title?'담당자가 생각한 제목(참고): '+d.title:'',
+    $('memo').value.trim()?'담당자 메모:\n'+$('memo').value.trim():''].filter(Boolean).join('\n');
+  blocks.push({type:'text',text:'위 자료로 보고서 제목 3개와 개조식 본문 초안을 만들어 주세요.\n\n'+info});
+  return blocks;
+}
+let LAST=null, BUSY=false;
+async function ask(messages,btn,busyText){
+  const model=$('model').value, label=btn.textContent;
+  const body={model,max_tokens:16000,system:SYSTEM,messages,output_config:{effort:'medium',format:{type:'json_schema',schema:SCHEMA}}};
+  BUSY=true; btn.disabled=true; btn.textContent=busyText; aiMsg('');
+  try{
+    let {status,j}=await callClaude(body,!!FALLBACK_OK[model]);
+    if(status===400&&/fallback/i.test(JSON.stringify(j))) ({status,j}=await callClaude(body,false));
+    if(status!==200){ aiMsg(apiError(status,j),'err'); return false; }
+    if(j.stop_reason==='refusal'){ aiMsg('Claude가 이 요청을 처리하지 않았습니다. 자료 내용을 확인해 주세요.'+(j.stop_details&&j.stop_details.explanation?' ('+esc(j.stop_details.explanation)+')':''),'err'); return false; }
+    if(j.stop_reason==='max_tokens'){ aiMsg('답이 너무 길어 중간에 끊겼습니다. 분량을 줄이거나 자료를 줄여 다시 시도해 주세요.','err'); return false; }
+    const txt=(j.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('');
+    const r=JSON.parse(txt); r._usage=j.usage; r._model=j.model||model;
+    LAST=r; showResult(r);
+    return true;
+  }catch(e){
+    aiMsg(e instanceof TypeError?'Claude 서버에 연결하지 못했습니다. 인터넷 연결을 확인하고, 업무망이라면 api.anthropic.com 접속이 막혀 있을 수 있습니다.':'결과를 읽지 못했습니다: '+esc(e.message),'err');
+    return false;
+  }finally{ BUSY=false; btn.disabled=false; btn.textContent=label; }
+}
+$('aiGo').onclick=async()=>{
+  if(BUSY) return;
+  if(!$('apikey').value.trim()){ $('apiBox').open=true; aiMsg('먼저 Claude API 키를 넣어 주세요.','err'); return; }
+  if(!FILES.length&&!$('memo').value.trim()){ aiMsg('자료 파일을 올리거나 메모를 적어 주세요.','err'); return; }
+  const total=FILES.reduce((a,f)=>a+f.bytes,0);
+  if(total>REQ_LIMIT){ aiMsg('자료가 모두 '+fmtSize(total)+'로, 한 번에 보낼 수 있는 크기(약 30MB)를 넘습니다. PDF나 사진 수를 줄여 주세요.','err'); return; }
+  if(await ask([{role:'user',content:buildContent()}],$('aiGo'),'Claude가 자료를 읽는 중… (30초~1분)')){
+    $('aiGo').textContent='AI로 보고서 초안 다시 받기';
+    aiMsg('초안을 받았습니다. 제목을 고르고 본문을 넣어 다듬으세요.','ok');
+  }
+};
+// AI 결과를 본문 칸 형식(1. / □ / ○ / - / ※)으로 바꿉니다.
+function draftText(r){
+  let h=0; const M={'1':'□ ','2':'○ ','3':'- ','note':'※ '};
+  return r.body.map(b=>{ const t=b.text.replace(/^[□○❏❍\-※\s]+/,'').replace(/^\d{1,2}\.\s+/,'');
+    return b.level==='h'?(++h)+'. '+t:(M[b.level]||'□ ')+t; }).join('\n');
+}
+function showResult(r){
+  $('aiOut').hidden=false;
+  $('titleCands').innerHTML=r.titles.map((t,i)=>'<div class="cand" data-t="'+i+'"><span class="tx">'+esc(t.text)+'</span> <span class="cnt">'+t.text.length+'자</span><div class="why">'+esc(t.reason)+'</div></div>').join('')
+    +(r.subtitle?'<div class="note" style="margin-top:6px">부제 추천: '+esc(r.subtitle)+'</div>':'');
+  $('draftWrap').hidden=!r.body.length;
+  $('draftView').textContent=draftText(r);
+  $('chkWrap').hidden=!r.checks.length;
+  $('chkList').innerHTML=r.checks.map(c=>'<li>'+esc(c)+'</li>').join('');
+  const u=r._usage||{}, p=PRICE[$('model').value]||[0,0], inT=(u.input_tokens||0)+(u.cache_read_input_tokens||0)+(u.cache_creation_input_tokens||0);
+  $('usage').textContent='사용 모델 '+r._model+' · 입력 '+inT.toLocaleString()+' / 출력 '+(u.output_tokens||0).toLocaleString()+' 토큰 · 약 $'+((inT*p[0]+(u.output_tokens||0)*p[1])/1e6).toFixed(3)+' (어림값)';
+}
+$('titleCands').onclick=e=>{const c=e.target.closest('.cand'); if(!c||!LAST)return;
+  $('title').value=LAST.titles[+c.dataset.t].text;
+  if(LAST.subtitle&&!$('subtitle').value.trim()) $('subtitle').value=LAST.subtitle.replace(/^[-–\s]+|[-–\s]+$/g,'');
+  render(); saveDraft();
+  $('titleCands').querySelectorAll('.cand').forEach(x=>x.classList.toggle('on',x===c));};
+$('useDraft').onclick=()=>{ if(!LAST)return;
+  if($('body').value.trim()&&!confirm('본문 칸에 적힌 내용을 AI 초안으로 바꿀까요?')) return;
+  $('body').value=draftText(LAST); render(); saveDraft();
+  aiMsg('본문 초안을 넣었습니다. [확인 필요] 표시를 원자료로 채워 주세요.','ok'); };
+</script>
+</body>
+</html>
